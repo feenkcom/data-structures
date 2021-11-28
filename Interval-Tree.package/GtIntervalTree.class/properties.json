@@ -1,0 +1,17 @@
+{
+	"commentStamp" : "",
+	"super" : "Object",
+	"category" : "Interval-Tree",
+	"classinstvars" : [ ],
+	"pools" : [ ],
+	"classvars" : [ ],
+	"instvars" : [
+		"left",
+		"right",
+		"value",
+		"max",
+		"interval"
+	],
+	"name" : "GtIntervalTree",
+	"type" : "normal"
+}
