@@ -1,7 +1,7 @@
 Class {
 	#name : #IntervalTreeExamples,
 	#superclass : #Object,
-	#category : #'Interval-Tree-Interval-Tree'
+	#category : #'Interval-Tree-Examples'
 }
 
 { #category : #accessing }
