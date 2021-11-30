@@ -32,6 +32,38 @@ GtIntervalTree >> depthFirstCollect: aBlock [
 ]
 
 { #category : #accessing }
+GtIntervalTree >> depthFirstCollect: aBlock branchedOnLeft: aBranchingBlock [
+
+	| leftCond res |
+	res := OrderedCollection new.
+	leftCond := left isNotNil and: [ aBranchingBlock value: left ].
+	leftCond ifTrue: [ 
+		res addAll: (left depthFirstCollect: aBlock) ].
+
+	res add: (aBlock value: self).
+
+	(right isNotNil and: leftCond not) ifTrue: [ 
+		res addAll: (right depthFirstCollect: aBlock) ]
+]
+
+{ #category : #accessing }
+GtIntervalTree >> depthFirstCollect: aBlock filteredWithLeft: aLeftFilterBlock andRight: aRightFilterBlock [
+
+	| res |
+	res := OrderedCollection new.
+
+	(left isNotNil and: [ aLeftFilterBlock value: left ]) ifTrue: [ 
+		res addAll: (left depthFirstCollect: aBlock) ].
+
+	res add: (aBlock value: self).
+
+	(right isNotNil and: [ aRightFilterBlock value: right ]) ifTrue: [ 
+		res addAll: (right depthFirstCollect: aBlock) ].
+
+	^ res
+]
+
+{ #category : #accessing }
 GtIntervalTree >> depthFirstDo: aBlock [
 
 	left ifNotNil: [ left depthFirstDo: aBlock ].
@@ -39,6 +71,32 @@ GtIntervalTree >> depthFirstDo: aBlock [
 	aBlock value: self.
 
 	right ifNotNil: [ right depthFirstDo: aBlock ]
+]
+
+{ #category : #accessing }
+GtIntervalTree >> depthFirstDo: aBlock branchedOnLeft: aBranchingBlock [
+
+	| leftCond |
+	leftCond := left isNotNil and: [ aBranchingBlock value: left ].
+	leftCond ifTrue: [ 
+		left depthFirstCollect: aBlock ].
+
+	aBlock value: self.
+
+	(right isNotNil and: leftCond not) ifTrue: [ 
+		right depthFirstCollect: aBlock ]
+]
+
+{ #category : #accessing }
+GtIntervalTree >> depthFirstDo: aBlock filteredWithLeft: aLeftFilterBlock andRight: aRightFilterBlock [
+
+	(left isNotNil and: [ aLeftFilterBlock value: left ]) ifTrue: [ 
+		left depthFirstCollect: aBlock ].
+
+	aBlock value: self.
+
+	(right isNotNil and: [ aRightFilterBlock value: right ]) ifTrue: [ 
+		right depthFirstCollect: aBlock ]
 ]
 
 { #category : #accessing }
@@ -125,8 +183,10 @@ GtIntervalTree >> search: aValue [
 	| res |
 	res := OrderedCollection new.
 
-	self depthFirstDo: [ :aNode | 
-		(aNode interval contains: aValue) ifTrue: [ res add: aNode value ] ].
+	self
+		depthFirstDo: [ :aNode | 
+			(aNode interval contains: aValue) ifTrue: [ res add: aNode value ] ]
+		branchedOnLeft: [ :aNode | aNode max >= aValue ].
 
 	^ res
 ]
@@ -139,7 +199,7 @@ GtIntervalTree >> searchInterval: anInterval [
 
 	self depthFirstDo: [ :aNode | 
 		(aNode interval overlaps: anInterval) ifTrue: [ 
-			res add: aNode value ] ].
+			res add: aNode value ] ] branchedOnLeft: [ :aNode | aNode max >= anInterval lower ].
 
 	^ res
 ]
