@@ -37,3 +37,19 @@ IntervalTreeExamples >> tree [
 	root insert: 'Pan Geng' at: (GtInterval from: -1290 to: -1262).
 	^ root
 ]
+
+{ #category : #accessing }
+IntervalTreeExamples >> treeDiff [
+	<gtExample>
+	
+	| treeA treeB |
+	treeA := self tree.
+	
+	treeB := GtIntervalTree node: 'Murong Yong' at: (GtInterval from: 386 to: 394).
+	treeB insert: 'Ruzi Ying' at: (GtInterval from: 6 to: 8).
+	treeB insert: 'Bu Jiang' at: (GtInterval from: -1851 to: -1792).
+	treeB insert: 'Qin Er Shi' at: (GtInterval from: -209 to: -206).
+	treeB insert: 'Not in the other tree' at: (GtInterval from: 5000 to: 6000).
+	
+	^ treeA diff: treeB
+]

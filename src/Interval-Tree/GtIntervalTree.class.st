@@ -42,6 +42,15 @@ GtIntervalTree >> depthFirstDo: aBlock [
 ]
 
 { #category : #accessing }
+GtIntervalTree >> diff: aTree [
+	| nodesA nodesB |
+	nodesA := self depthFirstCollect: [:each | each interval -> each value].
+	nodesB := aTree depthFirstCollect: [:each | each interval -> each value].
+	
+	^ nodesA copyWithoutAll: nodesB
+]
+
+{ #category : #accessing }
 GtIntervalTree >> gtChildren [
 	| children |
 	children := OrderedCollection new.

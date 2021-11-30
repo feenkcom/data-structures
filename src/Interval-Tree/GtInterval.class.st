@@ -14,6 +14,11 @@ GtInterval class >> from: aValue to: anotherValue [
 ]
 
 { #category : #accessing }
+GtInterval >> = other [
+	^ lower = other lower and: upper = other upper
+]
+
+{ #category : #accessing }
 GtInterval >> contains: aValue [
 	^ lower <= aValue and: upper >= aValue
 ]
