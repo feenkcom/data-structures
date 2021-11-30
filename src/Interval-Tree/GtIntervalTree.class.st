@@ -17,6 +17,31 @@ GtIntervalTree class >> node: aValue at: anInterval [
 ]
 
 { #category : #accessing }
+GtIntervalTree >> depthFirstCollect: aBlock [
+
+	| res |
+	res := OrderedCollection new.
+
+	left ifNotNil: [ res addAll: (left depthFirstCollect: aBlock) ].
+
+	res add: (aBlock value: self).
+
+	right ifNotNil: [ res addAll: (right depthFirstCollect: aBlock) ].
+
+	^ res
+]
+
+{ #category : #accessing }
+GtIntervalTree >> depthFirstDo: aBlock [
+
+	left ifNotNil: [ left depthFirstDo: aBlock ].
+
+	aBlock value: self.
+
+	right ifNotNil: [ right depthFirstDo: aBlock ]
+]
+
+{ #category : #accessing }
 GtIntervalTree >> gtChildren [
 	| children |
 	children := OrderedCollection new.
@@ -90,12 +115,10 @@ GtIntervalTree >> search: aValue [
 
 	| res |
 	res := OrderedCollection new.
-	(interval contains: aValue) ifTrue: [ res add: value ].
 
-	left ifNotNil: [ res addAll: (left search: aValue) ].
+	self depthFirstDo: [ :aNode | 
+		(aNode interval contains: aValue) ifTrue: [ res add: aNode value ] ].
 
-	right ifNotNil: [ res addAll: (right search: aValue) ].
-	
 	^ res
 ]
 
@@ -104,12 +127,11 @@ GtIntervalTree >> searchInterval: anInterval [
 
 	| res |
 	res := OrderedCollection new.
-	(interval overlaps: anInterval) ifTrue: [ res add: value ].
-	
-	(left isNotNil and: [ left max >= anInterval lower ]) ifTrue: [ 
-		res addAll: (left searchInterval: anInterval) ].
 
-	right ifNotNil: [ res addAll: (right searchInterval: anInterval) ].
+	self depthFirstDo: [ :aNode | 
+		(aNode interval overlaps: anInterval) ifTrue: [ 
+			res add: aNode value ] ].
+
 	^ res
 ]
 
