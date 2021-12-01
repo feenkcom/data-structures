@@ -23,6 +23,18 @@ Class {
 }
 
 { #category : #accessing }
+GtIntervalTree class >> fromNodes: aCollectionOfAssociations [
+	| root |
+	self assert: aCollectionOfAssociations isNotEmpty.
+	
+	root := self node: aCollectionOfAssociations first key at:aCollectionOfAssociations first value.
+	
+	aCollectionOfAssociations allButFirst do: [:each | root := root insert: each key at: each value].
+	
+	^ root 
+]
+
+{ #category : #accessing }
 GtIntervalTree class >> node: aValue at: anInterval [
 	^ self new value: aValue; interval: anInterval; max: anInterval upper; leftDepth: 0; rightDepth: 0
 ]
@@ -231,6 +243,11 @@ GtIntervalTree >> rebalance [
 GtIntervalTree >> recalculateDepths [
 	left ifNil: [ leftDepth := 0 ] ifNotNil: [ left recalculateDepths. leftDepth := left depth + 1].
 	right ifNil: [ rightDepth := 0 ] ifNotNil: [ right recalculateDepths. rightDepth := right depth + 1].
+]
+
+{ #category : #accessing }
+GtIntervalTree >> right [
+	^ right
 ]
 
 { #category : #accessing }
