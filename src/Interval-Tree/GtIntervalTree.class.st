@@ -29,7 +29,12 @@ GtIntervalTree class >> node: aValue at: anInterval [
 
 { #category : #accessing }
 GtIntervalTree >> balance [
-	self flag: 'TODO'
+	^ rightDepth - leftDepth
+]
+
+{ #category : #accessing }
+GtIntervalTree >> depth [
+	^ leftDepth max: rightDepth
 ]
 
 { #category : #accessing }
@@ -149,10 +154,26 @@ GtIntervalTree >> gtTreeFor: aView [
 { #category : #accessing }
 GtIntervalTree >> insert: aValue at: anInterval [
 
-	self privateInsert: aValue at: anInterval.
+	| res |
+	anInterval lower < interval lower
+		ifTrue: [ 
+			left
+				ifNil: [ 
+					left := GtIntervalTree node: aValue at: anInterval.
+					leftDepth := 1 ]
+				ifNotNil: [ left := (left insert: aValue at: anInterval) ] ]
+		ifFalse: [ 
+			right
+				ifNil: [ 
+					right := GtIntervalTree node: aValue at: anInterval.
+					rightDepth := 1 ]
+				ifNotNil: [ right := (right insert: aValue at: anInterval) ] ].
 
-	(leftDepth - rightDepth > 2 or: leftDepth - rightDepth < -2) ifTrue: [ 
-		self balance ]
+	max < anInterval upper ifTrue: [ max := anInterval upper ].
+	
+	self recalculateDepths.
+	
+	^ self rebalance
 ]
 
 { #category : #accessing }
@@ -176,6 +197,11 @@ GtIntervalTree >> left [
 ]
 
 { #category : #accessing }
+GtIntervalTree >> left: aNode [
+	left := aNode
+]
+
+{ #category : #accessing }
 GtIntervalTree >> leftDepth: anInteger [
 	leftDepth := anInteger
 ]
@@ -192,30 +218,71 @@ GtIntervalTree >> max: aValue [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> privateInsert: aValue at: anInterval [
+GtIntervalTree >> rebalance [
+	"self halt."
+	(self balance < -1 and: (left isNotNil and: [left balance < 0])) ifTrue: [ ^ self rotateRight].
+	(self balance > 1 and: (right isNotNil and: [right balance > 0])) ifTrue: [ ^ self rotateLeft].
+	(self balance < -1 and: (left isNotNil and: [left balance > 0])) ifTrue: [ ^ self rotateLeftRight].
+	(self balance > 1 and: (right isNotNil and: [right balance < 0])) ifTrue: [ ^ self rotateRightLeft].
+	^ self
+]
 
-	anInterval lower < interval lower
-		ifTrue: [ 
-			left
-				ifNil: [ 
-					left := GtIntervalTree node: aValue at: anInterval.
-					leftDepth := 1 ]
-				ifNotNil: [ leftDepth := (left privateInsert: aValue at: anInterval) + 1 ] ]
-		ifFalse: [ 
-			right
-				ifNil: [ 
-					right := GtIntervalTree node: aValue at: anInterval.
-					rightDepth := 1 ]
-				ifNotNil: [ rightDepth := (right privateInsert: aValue at: anInterval) + 1 ] ].
+{ #category : #accessing }
+GtIntervalTree >> recalculateDepths [
+	left ifNil: [ leftDepth := 0 ] ifNotNil: [ left recalculateDepths. leftDepth := left depth + 1].
+	right ifNil: [ rightDepth := 0 ] ifNotNil: [ right recalculateDepths. rightDepth := right depth + 1].
+]
 
-	max < anInterval upper ifTrue: [ max := anInterval upper ].
-	
-	^ leftDepth max: rightDepth
+{ #category : #accessing }
+GtIntervalTree >> right: aNode [
+	right := aNode
 ]
 
 { #category : #accessing }
 GtIntervalTree >> rightDepth: anInteger [
 	rightDepth := anInteger
+]
+
+{ #category : #accessing }
+GtIntervalTree >> rotateLeft [
+	| r |
+	r := right.
+	right := r left.
+	r left: self.
+	r recalculateDepths.
+	self recalculateDepths.
+	self max: (right ifNil: [0] ifNotNil: [right max]).
+	^ r
+]
+
+{ #category : #accessing }
+GtIntervalTree >> rotateLeftRight [
+	| res |
+	left := left rotateLeft.
+	res := self rotateRight.
+	res recalculateDepths.
+	^ res
+]
+
+{ #category : #accessing }
+GtIntervalTree >> rotateRight [
+	| l |
+	l := left.
+	left := l right.
+	l right: self.
+	l max: l right max.
+	self recalculateDepths.
+	l recalculateDepths.
+	^ l
+]
+
+{ #category : #accessing }
+GtIntervalTree >> rotateRightLeft [
+	| res |
+	right := right rotateRight.
+	res := self rotateLeft.
+	res recalculateDepths.
+	^ res
 ]
 
 { #category : #accessing }
