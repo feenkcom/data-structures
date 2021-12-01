@@ -1,3 +1,12 @@
+"
+# Interval Tree
+
+is a simple implementation of an interval tree, providing a way to query values by intervals or values within the interval.
+
+#Example
+
+{{gtExample:IntervalTreeExamples>>search}}
+"
 Class {
 	#name : #GtIntervalTree,
 	#superclass : #Object,

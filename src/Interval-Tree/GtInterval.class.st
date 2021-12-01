@@ -1,3 +1,11 @@
+"
+# Interval
+
+is an implementation of intervals meant to be used with {{gtClass:GtIntervalTree}}.
+
+#Example
+{{gtExample:IntervalExamples>>numericInterval}}
+"
 Class {
 	#name : #GtInterval,
 	#superclass : #Object,
@@ -15,12 +23,22 @@ GtInterval class >> from: aValue to: anotherValue [
 
 { #category : #accessing }
 GtInterval >> = other [
-	^ lower = other lower and: upper = other upper
+	^ (other isKindOf: GtInterval) and: [lower = other lower and: upper = other upper]
 ]
 
 { #category : #accessing }
 GtInterval >> contains: aValue [
 	^ lower <= aValue and: upper >= aValue
+]
+
+{ #category : #accessing }
+GtInterval >> gtStringFor: aView [
+
+	<gtView>
+	^ aView textEditor
+		title: 'Representation';
+		priority: 1;
+		text: [ self intervalString ]
 ]
 
 { #category : #accessing }
