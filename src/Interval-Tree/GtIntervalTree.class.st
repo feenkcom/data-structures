@@ -199,11 +199,6 @@ GtIntervalTree >> interval: anInterval [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> isLeaf [
-	^ left isNil and: right isNil
-]
-
-{ #category : #accessing }
 GtIntervalTree >> left [
 	^ left
 ]
