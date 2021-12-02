@@ -183,7 +183,7 @@ GtIntervalTree >> insert: aValue at: anInterval [
 
 	max < anInterval upper ifTrue: [ max := anInterval upper ].
 	
-	self recalculateDepths.
+	self recalculateDepthsOne.
 	
 	^ self rebalance
 ]
@@ -243,6 +243,13 @@ GtIntervalTree >> rebalance [
 GtIntervalTree >> recalculateDepths [
 	left ifNil: [ leftDepth := 0 ] ifNotNil: [ left recalculateDepths. leftDepth := left depth + 1].
 	right ifNil: [ rightDepth := 0 ] ifNotNil: [ right recalculateDepths. rightDepth := right depth + 1].
+]
+
+{ #category : #accessing }
+GtIntervalTree >> recalculateDepthsOne [
+	"non-recursive version of recalculateDepths. useful if you know the child nodes' depths are accurate (such as at the end of insert)"
+	left ifNil: [ leftDepth := 0 ] ifNotNil: [ leftDepth := left depth + 1].
+	right ifNil: [ rightDepth := 0 ] ifNotNil: [ rightDepth := right depth + 1].
 ]
 
 { #category : #accessing }
