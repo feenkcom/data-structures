@@ -151,15 +151,42 @@ GtIntervalTree >> gtChildren [
 ]
 
 { #category : #accessing }
+GtIntervalTree >> gtGraphFor: aView [
+
+	<gtView>
+	^ aView mondrian
+		  title: 'Graph';
+		  priority: 1;
+		  painting: [ :m | 
+			  m nodes
+				  stencil: [ :each | 
+				  	BrVerticalPane new
+				  		fitContent;
+				  		alignCenter;
+				  		addChild: (
+					  		BrLabel new
+						  		aptitude: BrGlamorousLabelAptitude;
+						  		text: each value asString);
+				  		addChild: (
+					  		BrLabel new
+						  		aptitude: (BrGlamorousLabelAptitude new foreground: Color gray; fontSize: 10);
+						  		text: each interval intervalString)
+						  		 ];
+				  with: (self depthFirstCollect: #yourself).
+			  m edges connectToAll: #gtChildren.
+			  m layout tree separateSubtrees: true; nodeDistance: 10 ]
+]
+
+{ #category : #accessing }
 GtIntervalTree >> gtTreeFor: aView [
 	<gtView>
 	
 	^ aView columnedTree
 		  title: 'Tree';
-		  priority: 1;
+		  priority: 2;
 		  items: [ { self } ];
-		  children: [ :eachItem | eachItem gtChildren ];
-		  column: 'Value' text: [ :eachItem | eachItem value ];
+		  children: #gtChildren;
+		  column: 'Value' text: #value;
 		  column: 'Interval' text: [ :eachItem | eachItem interval intervalString ]
 ]
 
