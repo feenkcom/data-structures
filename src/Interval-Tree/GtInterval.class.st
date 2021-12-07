@@ -35,13 +35,39 @@ GtInterval >> contains: aValue [
 ]
 
 { #category : #accessing }
-GtInterval >> gtStringFor: aView [
+GtInterval >> gtLiveFor: aView [
 
 	<gtView>
-	^ aView textEditor
-		title: 'Representation';
-		priority: 1;
-		text: [ self intervalString ]
+	^ aView explicit
+		  title: 'Live';
+		  stencil: [ 
+			  BlElement new
+				  layout: BlFrameLayout new;
+				  constraintsDo: [ :c | 
+					  c horizontal matchParent.
+					  c vertical matchParent ];
+				  addChild: (BlElement new
+						   aptitude: BrShadowAptitude new;
+						   background: Color white;
+						   constraintsDo: [ :c | 
+							   c frame horizontal alignCenter.
+							   c frame vertical alignCenter.
+							   c horizontal fitContent.
+							   c vertical fitContent ];
+						   layout: BlLinearLayout horizontal;
+						   addChild: (BrLabel new
+								    text: lower asString;
+								    aptitude: BrGlamorousLabelAptitude;
+								    layout: BlLinearLayout vertical alignCenter;
+								    padding: (BlInsets all: 10));
+						   addChild: ((BrGlamorousVectorIcons right asElement asScalableElement)
+								    layout: BlLinearLayout vertical alignCenter;
+								    margin: (BlInsets all: 5));
+						   addChild: (BrLabel new
+								    text: upper asString;
+								    aptitude: BrGlamorousLabelAptitude;
+								    layout: BlLinearLayout vertical alignCenter;
+								    padding: (BlInsets all: 10))) ]
 ]
 
 { #category : #accessing }
