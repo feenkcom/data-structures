@@ -57,6 +57,18 @@ IntervalTreeExamples >> searchInterval [
 ]
 
 { #category : #accessing }
+IntervalTreeExamples >> shiftLeft [
+	<gtExample>
+	^ self tree shiftIntervalsBy: -1000 after: 100
+]
+
+{ #category : #accessing }
+IntervalTreeExamples >> shiftRight [
+	<gtExample>
+	^ self tree shiftIntervalsBy: 1000 after: -100
+]
+
+{ #category : #accessing }
 IntervalTreeExamples >> tree [
 	<gtExample>
 	| root |

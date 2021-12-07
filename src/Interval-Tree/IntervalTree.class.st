@@ -458,6 +458,24 @@ IntervalTree >> searchInterval: anInterval [
 ]
 
 { #category : #accessing }
+IntervalTree >> shiftIntervalsBy: aNumber after: anotherNumber [
+
+	"TODO: this needs to move the entire tree possibly"
+
+	| r l |
+	self depthFirstDo: [ :each | 
+		each interval lower >= anotherNumber ifTrue: [ 
+			each interval shiftBy: aNumber ] ].
+	r := right.
+	right ifNotNil: [ right parent: nil ].
+	self right: nil.
+	l := left.
+	left ifNotNil: [ left parent: nil ].
+	self left: nil.
+	^ (self reloadTree: l) reloadTree: r
+]
+
+{ #category : #accessing }
 IntervalTree >> value [
 	^ value
 ]

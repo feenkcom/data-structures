@@ -21,3 +21,9 @@ IntervalExamples >> numericInterval [
 	<gtExample>
 	^ GtInterval from: 1 to: 120
 ]
+
+{ #category : #accessing }
+IntervalExamples >> shiftBy [
+	<gtExample>
+	^ (GtInterval from: 1 to: 10) shiftBy: 10
+]

@@ -65,6 +65,12 @@ GtInterval >> overlaps: anInterval [
 ]
 
 { #category : #accessing }
+GtInterval >> shiftBy: aNumber [
+	lower := lower + aNumber.
+	upper := upper + aNumber
+]
+
+{ #category : #accessing }
 GtInterval >> upper [
 	^ upper
 ]
