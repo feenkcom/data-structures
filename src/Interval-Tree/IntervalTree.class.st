@@ -8,7 +8,7 @@ is a simple implementation of an interval tree, providing a way to query values 
 {{gtExample:IntervalTreeExamples>>search}}
 "
 Class {
-	#name : #GtIntervalTree,
+	#name : #IntervalTree,
 	#superclass : #Object,
 	#instVars : [
 		'left',
@@ -17,13 +17,19 @@ Class {
 		'max',
 		'interval',
 		'leftDepth',
-		'rightDepth'
+		'rightDepth',
+		'parent'
 	],
 	#category : #'Interval-Tree-Core'
 }
 
 { #category : #accessing }
-GtIntervalTree class >> fromNodes: aCollectionOfAssociations [
+IntervalTree class >> empty [
+	^ self new max: 0; leftDepth: 0; rightDepth: 0
+]
+
+{ #category : #accessing }
+IntervalTree class >> fromNodes: aCollectionOfAssociations [
 	| root |
 	self assert: aCollectionOfAssociations isNotEmpty.
 	
@@ -35,22 +41,22 @@ GtIntervalTree class >> fromNodes: aCollectionOfAssociations [
 ]
 
 { #category : #accessing }
-GtIntervalTree class >> node: aValue at: anInterval [
+IntervalTree class >> node: aValue at: anInterval [
 	^ self new value: aValue; interval: anInterval; max: anInterval upper; leftDepth: 0; rightDepth: 0
 ]
 
 { #category : #accessing }
-GtIntervalTree >> balance [
+IntervalTree >> balance [
 	^ rightDepth - leftDepth
 ]
 
 { #category : #accessing }
-GtIntervalTree >> depth [
+IntervalTree >> depth [
 	^ leftDepth max: rightDepth
 ]
 
 { #category : #accessing }
-GtIntervalTree >> depthFirstCollect: aBlock [
+IntervalTree >> depthFirstCollect: aBlock [
 
 	| res |
 	res := OrderedCollection new.
@@ -65,7 +71,7 @@ GtIntervalTree >> depthFirstCollect: aBlock [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> depthFirstCollect: aBlock branchedOnLeft: aBranchingBlock [
+IntervalTree >> depthFirstCollect: aBlock branchedOnLeft: aBranchingBlock [
 
 	| leftCond res |
 	res := OrderedCollection new.
@@ -80,7 +86,7 @@ GtIntervalTree >> depthFirstCollect: aBlock branchedOnLeft: aBranchingBlock [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> depthFirstCollect: aBlock filteredWithLeft: aLeftFilterBlock andRight: aRightFilterBlock [
+IntervalTree >> depthFirstCollect: aBlock filteredWithLeft: aLeftFilterBlock andRight: aRightFilterBlock [
 
 	| res |
 	res := OrderedCollection new.
@@ -97,7 +103,7 @@ GtIntervalTree >> depthFirstCollect: aBlock filteredWithLeft: aLeftFilterBlock a
 ]
 
 { #category : #accessing }
-GtIntervalTree >> depthFirstDo: aBlock [
+IntervalTree >> depthFirstDo: aBlock [
 
 	left ifNotNil: [ left depthFirstDo: aBlock ].
 
@@ -107,7 +113,7 @@ GtIntervalTree >> depthFirstDo: aBlock [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> depthFirstDo: aBlock branchedOnLeft: aBranchingBlock [
+IntervalTree >> depthFirstDo: aBlock branchedOnLeft: aBranchingBlock [
 
 	| leftCond |
 	leftCond := left isNotNil and: [ aBranchingBlock value: left ].
@@ -121,7 +127,7 @@ GtIntervalTree >> depthFirstDo: aBlock branchedOnLeft: aBranchingBlock [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> depthFirstDo: aBlock filteredWithLeft: aLeftFilterBlock andRight: aRightFilterBlock [
+IntervalTree >> depthFirstDo: aBlock filteredWithLeft: aLeftFilterBlock andRight: aRightFilterBlock [
 
 	(left isNotNil and: [ aLeftFilterBlock value: left ]) ifTrue: [ 
 		left depthFirstCollect: aBlock ].
@@ -133,7 +139,7 @@ GtIntervalTree >> depthFirstDo: aBlock filteredWithLeft: aLeftFilterBlock andRig
 ]
 
 { #category : #accessing }
-GtIntervalTree >> diff: aTree [
+IntervalTree >> diff: aTree [
 	| nodesA nodesB |
 	nodesA := self depthFirstCollect: [:each | each interval -> each value].
 	nodesB := aTree depthFirstCollect: [:each | each interval -> each value].
@@ -142,7 +148,7 @@ GtIntervalTree >> diff: aTree [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> gtChildren [
+IntervalTree >> gtChildren [
 	| children |
 	children := OrderedCollection new.
 	left ifNotNil: [children add: left].
@@ -151,9 +157,12 @@ GtIntervalTree >> gtChildren [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> gtGraphFor: aView [
+IntervalTree >> gtGraphFor: aView [
 
 	<gtView>
+	interval ifNil: [
+		^ aView empty.
+	].
 	^ aView mondrian
 		  title: 'Graph';
 		  priority: 1;
@@ -178,33 +187,43 @@ GtIntervalTree >> gtGraphFor: aView [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> gtTreeFor: aView [
+IntervalTree >> gtTreeFor: aView [
 	<gtView>
 	
 	^ aView columnedTree
 		  title: 'Tree';
 		  priority: 2;
-		  items: [ { self } ];
+		  items: [ interval ifNil: [{}] ifNotNil: [{ self }] ];
 		  children: #gtChildren;
 		  column: 'Value' text: #value;
 		  column: 'Interval' text: [ :eachItem | eachItem interval intervalString ]
 ]
 
 { #category : #accessing }
-GtIntervalTree >> insert: aValue at: anInterval [
+IntervalTree >> insert: aValue at: anInterval [
 
 	| res |
+	
+	"we were empty before"
+	interval ifNil: [
+		interval := anInterval.
+		value := aValue.
+		^ self
+	].
+	
 	anInterval lower < interval lower
 		ifTrue: [ 
 			left
 				ifNil: [ 
-					left := GtIntervalTree node: aValue at: anInterval.
+					left := IntervalTree node: aValue at: anInterval.
+					left parent: self.
 					leftDepth := 1 ]
 				ifNotNil: [ left := (left insert: aValue at: anInterval) ] ]
 		ifFalse: [ 
 			right
 				ifNil: [ 
-					right := GtIntervalTree node: aValue at: anInterval.
+					right := IntervalTree node: aValue at: anInterval.
+					right parent: self.
 					rightDepth := 1 ]
 				ifNotNil: [ right := (right insert: aValue at: anInterval) ] ].
 
@@ -216,43 +235,49 @@ GtIntervalTree >> insert: aValue at: anInterval [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> interval [
+IntervalTree >> interval [
 	^ interval
 ]
 
 { #category : #accessing }
-GtIntervalTree >> interval: anInterval [
+IntervalTree >> interval: anInterval [
 	interval := anInterval
 ]
 
 { #category : #accessing }
-GtIntervalTree >> left [
+IntervalTree >> left [
 	^ left
 ]
 
 { #category : #accessing }
-GtIntervalTree >> left: aNode [
-	left := aNode
+IntervalTree >> left: aNode [
+	left := aNode.
+	left ifNotNil: [ left parent: self ]
 ]
 
 { #category : #accessing }
-GtIntervalTree >> leftDepth: anInteger [
+IntervalTree >> leftDepth: anInteger [
 	leftDepth := anInteger
 ]
 
 { #category : #accessing }
-GtIntervalTree >> max [
+IntervalTree >> max [
 
 	^ max
 ]
 
 { #category : #accessing }
-GtIntervalTree >> max: aValue [
+IntervalTree >> max: aValue [
 	max := aValue
 ]
 
 { #category : #accessing }
-GtIntervalTree >> rebalance [
+IntervalTree >> parent: aNode [
+	parent := aNode
+]
+
+{ #category : #accessing }
+IntervalTree >> rebalance [
 	"self halt."
 	(self balance < -1 and: (left isNotNil and: [left balance < 0])) ifTrue: [ ^ self rotateRight].
 	(self balance > 1 and: (right isNotNil and: [right balance > 0])) ifTrue: [ ^ self rotateLeft].
@@ -262,38 +287,88 @@ GtIntervalTree >> rebalance [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> recalculateDepths [
+IntervalTree >> recalculateDepths [
 	left ifNil: [ leftDepth := 0 ] ifNotNil: [ left recalculateDepths. leftDepth := left depth + 1].
 	right ifNil: [ rightDepth := 0 ] ifNotNil: [ right recalculateDepths. rightDepth := right depth + 1].
 ]
 
 { #category : #accessing }
-GtIntervalTree >> recalculateDepthsOne [
+IntervalTree >> recalculateDepthsOne [
 	"non-recursive version of recalculateDepths. useful if you know the child nodes' depths are accurate (such as at the end of insert)"
 	left ifNil: [ leftDepth := 0 ] ifNotNil: [ leftDepth := left depth + 1].
 	right ifNil: [ rightDepth := 0 ] ifNotNil: [ rightDepth := right depth + 1].
 ]
 
 { #category : #accessing }
-GtIntervalTree >> right [
+IntervalTree >> reloadTree: aNode [
+	| s |
+	s := self.
+	aNode left ifNotNil: [ s := s reloadTree: aNode left ].
+	aNode right ifNotNil: [ s := s reloadTree: aNode right ].
+	^ s insert: aNode value at: aNode interval
+]
+
+{ #category : #accessing }
+IntervalTree >> remove: anInterval [
+
+	left ifNotNil: [ left remove: anInterval ].
+	right ifNotNil: [ right remove: anInterval ].
+	interval = anInterval ifTrue: [ 
+		parent ifNil: [ ^ left reloadTree: right ] ifNotNil: [ 
+			left
+				ifNil: [ 
+					self = parent left
+						ifTrue: [ parent left: right ]
+						ifFalse: [ parent right: right ] ]
+				ifNotNil: [ 
+					self = parent left
+						ifTrue: [ parent left: left ]
+						ifFalse: [ parent right: left ].
+					^ parent reloadTree: right ] ] ]
+]
+
+{ #category : #accessing }
+IntervalTree >> remove: anInterval if: aBlock [
+
+	left ifNotNil: [ left remove: anInterval if: aBlock ].
+	right ifNotNil: [ right remove: anInterval if: aBlock ].
+	(interval = anInterval and: [ aBlock value: value ]) ifTrue: [ 
+		parent ifNil: [ ^ left reloadTree: right ] ifNotNil: [ 
+			left
+				ifNil: [ 
+					self = parent left
+						ifTrue: [ parent left: right ]
+						ifFalse: [ parent right: right ] ]
+				ifNotNil: [ 
+					self = parent left
+						ifTrue: [ parent left: left ]
+						ifFalse: [ parent right: left ].
+					^ parent reloadTree: right ] ] ]
+]
+
+{ #category : #accessing }
+IntervalTree >> right [
 	^ right
 ]
 
 { #category : #accessing }
-GtIntervalTree >> right: aNode [
-	right := aNode
+IntervalTree >> right: aNode [
+	right := aNode.
+	right ifNotNil: [ right parent: self ]
 ]
 
 { #category : #accessing }
-GtIntervalTree >> rightDepth: anInteger [
+IntervalTree >> rightDepth: anInteger [
 	rightDepth := anInteger
 ]
 
 { #category : #accessing }
-GtIntervalTree >> rotateLeft [
+IntervalTree >> rotateLeft [
 	| r |
 	r := right.
 	right := r left.
+	right ifNotNil: [ right parent: self ].	
+	r parent: parent.
 	r left: self.
 	r recalculateDepths.
 	self recalculateDepths.
@@ -302,7 +377,7 @@ GtIntervalTree >> rotateLeft [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> rotateLeftRight [
+IntervalTree >> rotateLeftRight [
 	| res |
 	left := left rotateLeft.
 	res := self rotateRight.
@@ -311,11 +386,14 @@ GtIntervalTree >> rotateLeftRight [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> rotateRight [
+IntervalTree >> rotateRight [
+
 	| l |
 	l := left.
 	left := l right.
+	l parent: parent.
 	l right: self.
+	left ifNotNil: [ left parent: self ].
 	l max: l right max.
 	self recalculateDepths.
 	l recalculateDepths.
@@ -323,7 +401,7 @@ GtIntervalTree >> rotateRight [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> rotateRightLeft [
+IntervalTree >> rotateRightLeft [
 	| res |
 	right := right rotateRight.
 	res := self rotateLeft.
@@ -332,7 +410,7 @@ GtIntervalTree >> rotateRightLeft [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> search: aValue [
+IntervalTree >> search: aValue [
 
 	| res |
 	res := OrderedCollection new.
@@ -346,7 +424,7 @@ GtIntervalTree >> search: aValue [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> searchInterval: anInterval [
+IntervalTree >> searchInterval: anInterval [
 
 	| res |
 	res := OrderedCollection new.
@@ -359,11 +437,11 @@ GtIntervalTree >> searchInterval: anInterval [
 ]
 
 { #category : #accessing }
-GtIntervalTree >> value [
+IntervalTree >> value [
 	^ value
 ]
 
 { #category : #accessing }
-GtIntervalTree >> value: aValue [
+IntervalTree >> value: aValue [
 	value := aValue
 ]

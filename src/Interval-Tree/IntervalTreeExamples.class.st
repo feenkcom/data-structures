@@ -5,6 +5,36 @@ Class {
 }
 
 { #category : #accessing }
+IntervalTreeExamples >> empty [
+	<gtExample>
+	^ IntervalTree empty
+]
+
+{ #category : #accessing }
+IntervalTreeExamples >> remove [
+	<gtExample>
+	^ self tree remove: (GtInterval from: 6 to: 8)
+]
+
+{ #category : #accessing }
+IntervalTreeExamples >> removeIf [
+	<gtExample>
+	^ self tree remove: (GtInterval from: 386 to: 386) if: [:value | value beginsWith: 'Murong']
+]
+
+{ #category : #accessing }
+IntervalTreeExamples >> removeMultiple [
+	<gtExample>
+	^ self tree remove: (GtInterval from: 386 to: 386)
+]
+
+{ #category : #accessing }
+IntervalTreeExamples >> removeRoot [
+	<gtExample>
+	^ self tree remove: (GtInterval from: -209 to: -206)
+]
+
+{ #category : #accessing }
 IntervalTreeExamples >> search [
 	<gtExample>
 	| tree |
@@ -24,7 +54,7 @@ IntervalTreeExamples >> searchInterval [
 IntervalTreeExamples >> tree [
 	<gtExample>
 	| root |
-	root := GtIntervalTree fromNodes: {
+	root := IntervalTree fromNodes: {
 		'Youchao' -> (GtInterval from: -3162 to: -2962).
 		'Bu Jiang' -> (GtInterval from: -1851 to: -1792). 
 		'Pan Geng' -> (GtInterval from: -1290 to: -1262). 
@@ -47,7 +77,7 @@ IntervalTreeExamples >> treeDiff [
 	| treeA treeB |
 	treeA := self tree.
 	
-	treeB := GtIntervalTree fromNodes: {
+	treeB := IntervalTree fromNodes: {
 		'Murong Yong' -> (GtInterval from: 386 to: 394).
 		'Ruzi Ying' -> (GtInterval from: 6 to: 8).
 		'Bu Jiang' -> (GtInterval from: -1851 to: -1792).
