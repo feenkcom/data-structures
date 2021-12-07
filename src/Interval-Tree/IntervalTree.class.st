@@ -481,6 +481,14 @@ IntervalTree >> shiftIntervalsBy: aNumber after: anotherNumber [
 ]
 
 { #category : #accessing }
+IntervalTree >> size [
+	| count |
+	count := 0.
+	self depthFirstDo: [:_ | count := count + 1 ].
+	^ count
+]
+
+{ #category : #accessing }
 IntervalTree >> value [
 	^ value
 ]

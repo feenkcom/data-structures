@@ -28,26 +28,52 @@ IntervalTreeExamples >> negativeMax [
 
 { #category : #accessing }
 IntervalTreeExamples >> remove [
+
 	<gtExample>
-	^ self tree remove: (GtInterval from: 6 to: 8)
+	| tree removed |
+	tree := self tree.
+	self assert: (tree search: 7) size = 1.
+	removed := tree remove: (GtInterval from: 6 to: 8).
+	self assert: (removed search: 7) size = 0.
+	^ removed
 ]
 
 { #category : #accessing }
 IntervalTreeExamples >> removeIf [
+
 	<gtExample>
-	^ self tree remove: (GtInterval from: 386 to: 386) if: [:value | value beginsWith: 'Murong']
+	| tree removed |
+	tree := self tree.
+	self assert: (tree search: 386) size = 5.
+	removed := tree
+		           remove: (GtInterval from: 386 to: 386)
+		           if: [ :value | value beginsWith: 'Murong' ].
+	self assert: (removed search: 386) size = 2.
+	^ removed
 ]
 
 { #category : #accessing }
 IntervalTreeExamples >> removeMultiple [
 	<gtExample>
-	^ self tree remove: (GtInterval from: 386 to: 386)
+	| tree removed |
+	tree := self tree.
+	self assert: (tree search: 386) size = 5.
+	removed := tree
+		           remove: (GtInterval from: 386 to: 386).
+	self assert: (removed search: 386) size = 1.
+	^ removed
 ]
 
 { #category : #accessing }
 IntervalTreeExamples >> removeOverlapping [
 	<gtExample>
-	^ self tree removeOverlapping: (GtInterval from: 386 to: 915)
+	| tree removed |
+	tree := self tree.
+	self assert: (tree search: 386) size = 5.
+	removed := tree
+		           removeOverlapping: (GtInterval from: 386 to: 915).
+	self assert: (removed search: 386) size = 0.
+	^ removed
 ]
 
 { #category : #accessing }
@@ -59,17 +85,22 @@ IntervalTreeExamples >> removeRoot [
 { #category : #accessing }
 IntervalTreeExamples >> search [
 	<gtExample>
-	| tree |
+	| tree searchResult |
 	tree := self tree.
-	^ tree search: 386.
+	searchResult := tree search: 386.
+	self assert: searchResult size = 5.
+	^ searchResult
 ]
 
 { #category : #accessing }
 IntervalTreeExamples >> searchInterval [
+
 	<gtExample>
-	| tree |
+	| tree searchResult |
 	tree := self tree.
-	^ tree searchInterval: (GtInterval from: 364 to:1000).
+	searchResult := tree searchInterval: (GtInterval from: 364 to: 1000).
+	self assert: searchResult size = 6.
+	^ searchResult
 ]
 
 { #category : #accessing }
@@ -84,9 +115,14 @@ IntervalTreeExamples >> searchIntervalExactly [
 ]
 
 { #category : #accessing }
-IntervalTreeExamples >> shiftLeft [
+IntervalTreeExamples >> shiftLeftAfter0 [
+
 	<gtExample>
-	^ self tree shiftIntervalsBy: -1000 after: 100
+	| tree shifted |
+	tree := self tree.
+	shifted := tree shiftIntervalsBy: -1000 after: 0.
+	shifted depthFirstDo: [:each | self assert: (each interval lower < 0 or: each interval lower > 1000) ].
+	^ shifted
 ]
 
 { #category : #accessing }
@@ -110,6 +146,15 @@ IntervalTreeExamples >> shiftRightExactly [
 	searchResult := shifted searchInterval: (GtInterval from: 1006 to: 1008).
 	self assert: (searchResult size = 1 and: [searchResult first = 'Ruzi Ying']).
 	^ shifted
+]
+
+{ #category : #accessing }
+IntervalTreeExamples >> size [
+	<gtExample>
+	| tree |
+	tree := self tree.
+	self assert:tree size = 11. 
+	^ tree
 ]
 
 { #category : #accessing }
