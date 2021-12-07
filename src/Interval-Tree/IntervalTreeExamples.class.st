@@ -11,6 +11,22 @@ IntervalTreeExamples >> empty [
 ]
 
 { #category : #accessing }
+IntervalTreeExamples >> negativeMax [
+	<gtExample>
+	| tree searchResult |
+	tree := IntervalTree fromNodes: {
+		'A' -> (GtInterval from: -13 to: -10).
+		'B' -> (GtInterval from: -10 to: -5).
+		'C' -> (GtInterval from: -5 to: -3).
+		'D' -> (GtInterval from: -3 to: -2).
+		'E' -> (GtInterval from: -2 to: -1).
+	}.
+	self assert: tree max = -1.
+	self assert: tree left max = -10.
+	^ tree
+]
+
+{ #category : #accessing }
 IntervalTreeExamples >> remove [
 	<gtExample>
 	^ self tree remove: (GtInterval from: 6 to: 8)
@@ -57,15 +73,43 @@ IntervalTreeExamples >> searchInterval [
 ]
 
 { #category : #accessing }
+IntervalTreeExamples >> searchIntervalExactly [
+
+	<gtExample>
+	| tree searchResult |
+	tree := self tree.
+	searchResult := tree searchInterval: (GtInterval from: 6 to: 8).
+	self assert: (searchResult size = 1 and: [ searchResult first = 'Ruzi Ying']).
+	^ searchResult
+]
+
+{ #category : #accessing }
 IntervalTreeExamples >> shiftLeft [
 	<gtExample>
 	^ self tree shiftIntervalsBy: -1000 after: 100
 ]
 
 { #category : #accessing }
-IntervalTreeExamples >> shiftRight [
+IntervalTreeExamples >> shiftRightAfter100 [
+
 	<gtExample>
-	^ self tree shiftIntervalsBy: 1000 after: -100
+	| tree shifted |
+	tree := self tree.
+	shifted := tree shiftIntervalsBy: 1000 after: -100.
+	shifted depthFirstDo: [:each | self assert: (each interval lower < -100 or: each interval lower > 900) ].
+	^ shifted
+]
+
+{ #category : #accessing }
+IntervalTreeExamples >> shiftRightExactly [
+
+	<gtExample>
+	| tree shifted searchResult |
+	tree := self tree.
+	shifted := tree shiftIntervalsBy: 1000 after: 6.
+	searchResult := shifted searchInterval: (GtInterval from: 1006 to: 1008).
+	self assert: (searchResult size = 1 and: [searchResult first = 'Ruzi Ying']).
+	^ shifted
 ]
 
 { #category : #accessing }
@@ -90,17 +134,19 @@ IntervalTreeExamples >> tree [
 
 { #category : #accessing }
 IntervalTreeExamples >> treeDiff [
+
 	<gtExample>
-	
-	| treeA treeB |
+	| treeA treeB difference |
 	treeA := self tree.
-	
-	treeB := IntervalTree fromNodes: {
-		'Murong Yong' -> (GtInterval from: 386 to: 394).
-		'Ruzi Ying' -> (GtInterval from: 6 to: 8).
-		'Bu Jiang' -> (GtInterval from: -1851 to: -1792).
-		'Qin Er Shi' -> (GtInterval from: -209 to: -206).
-		'Not in the other tree' -> (GtInterval from: 5000 to: 6000).
-	}.
-	^ treeA diff: treeB
+
+	treeB := IntervalTree fromNodes: { 
+			         ('Murong Yong' -> (GtInterval from: 386 to: 394)).
+			         ('Ruzi Ying' -> (GtInterval from: 6 to: 8)).
+			         ('Bu Jiang' -> (GtInterval from: -1851 to: -1792)).
+			         ('Qin Er Shi' -> (GtInterval from: -209 to: -206)).
+			         ('Not in the other tree'
+			          -> (GtInterval from: 5000 to: 6000)) }.
+	difference := treeA diff: treeB.
+	self assert: difference size = 7.
+	^ difference
 ]

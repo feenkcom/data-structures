@@ -25,7 +25,7 @@ Class {
 
 { #category : #accessing }
 IntervalTree class >> empty [
-	^ self new max: 0; leftDepth: 0; rightDepth: 0
+	^ self new leftDepth: 0; rightDepth: 0
 ]
 
 { #category : #accessing }
@@ -179,7 +179,11 @@ IntervalTree >> gtGraphFor: aView [
 				  		addChild: (
 					  		BrLabel new
 						  		aptitude: (BrGlamorousLabelAptitude new foreground: Color gray; fontSize: 10);
-						  		text: each interval intervalString)
+						  		text: each interval intervalString);
+				  		addChild: (
+					  		BrLabel new
+						  		aptitude: (BrGlamorousLabelAptitude new foreground: Color gray; fontSize: 10);
+						  		text: 'Max: ' , each max asString)
 						  		 ];
 				  with: (self depthFirstCollect: #yourself).
 			  m edges connectToAll: #gtChildren.
@@ -208,6 +212,7 @@ IntervalTree >> insert: aValue at: anInterval [
 	interval ifNil: [
 		interval := anInterval.
 		value := aValue.
+		max := anInterval upper.
 		^ self
 	].
 	
@@ -393,7 +398,7 @@ IntervalTree >> rotateLeft [
 	r left: self.
 	r recalculateDepths.
 	self recalculateDepths.
-	self max: (right ifNil: [0] ifNotNil: [right max]).
+	self max: (right ifNil: [interval upper] ifNotNil: [right max]).
 	^ r
 ]
 
