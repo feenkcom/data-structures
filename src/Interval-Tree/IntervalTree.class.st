@@ -301,8 +301,10 @@ IntervalTree >> recalculateDepthsOne [
 
 { #category : #accessing }
 IntervalTree >> reloadTree: aNode [
+
 	| s |
 	s := self.
+	aNode ifNil: [ ^ s ].
 	aNode left ifNotNil: [ s := s reloadTree: aNode left ].
 	aNode right ifNotNil: [ s := s reloadTree: aNode right ].
 	^ s insert: aNode value at: aNode interval
@@ -333,6 +335,25 @@ IntervalTree >> remove: anInterval if: aBlock [
 	left ifNotNil: [ left remove: anInterval if: aBlock ].
 	right ifNotNil: [ right remove: anInterval if: aBlock ].
 	(interval = anInterval and: [ aBlock value: value ]) ifTrue: [ 
+		parent ifNil: [ ^ left reloadTree: right ] ifNotNil: [ 
+			left
+				ifNil: [ 
+					self = parent left
+						ifTrue: [ parent left: right ]
+						ifFalse: [ parent right: right ] ]
+				ifNotNil: [ 
+					self = parent left
+						ifTrue: [ parent left: left ]
+						ifFalse: [ parent right: left ].
+					^ parent reloadTree: right ] ] ]
+]
+
+{ #category : #accessing }
+IntervalTree >> removeOverlapping: anInterval [
+
+	left ifNotNil: [ left removeOverlapping: anInterval ].
+	right ifNotNil: [ right removeOverlapping: anInterval ].
+	(anInterval contains: interval) ifTrue: [ 
 		parent ifNil: [ ^ left reloadTree: right ] ifNotNil: [ 
 			left
 				ifNil: [ 

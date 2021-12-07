@@ -28,6 +28,9 @@ GtInterval >> = other [
 
 { #category : #accessing }
 GtInterval >> contains: aValue [
+
+	(aValue isKindOf: GtInterval) ifTrue: [ 
+		^ lower <= aValue lower and: upper >= aValue upper ].
 	^ lower <= aValue and: upper >= aValue
 ]
 

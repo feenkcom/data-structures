@@ -29,6 +29,12 @@ IntervalTreeExamples >> removeMultiple [
 ]
 
 { #category : #accessing }
+IntervalTreeExamples >> removeOverlapping [
+	<gtExample>
+	^ self tree removeOverlapping: (GtInterval from: 386 to: 915)
+]
+
+{ #category : #accessing }
 IntervalTreeExamples >> removeRoot [
 	<gtExample>
 	^ self tree remove: (GtInterval from: -209 to: -206)
