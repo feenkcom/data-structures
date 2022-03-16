@@ -283,7 +283,6 @@ IntervalTree >> parent: aNode [
 
 { #category : #accessing }
 IntervalTree >> rebalance [
-	"self halt."
 	(self balance < -1 and: (left isNotNil and: [left balance < 0])) ifTrue: [ ^ self rotateRight].
 	(self balance > 1 and: (right isNotNil and: [right balance > 0])) ifTrue: [ ^ self rotateLeft].
 	(self balance < -1 and: (left isNotNil and: [left balance > 0])) ifTrue: [ ^ self rotateLeftRight].
