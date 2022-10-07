@@ -205,8 +205,6 @@ IntervalTree >> gtTreeFor: aView [
 
 { #category : #accessing }
 IntervalTree >> insert: aValue at: anInterval [
-
-	| res |
 	
 	"we were empty before"
 	interval ifNil: [

@@ -71,6 +71,11 @@ GtInterval >> gtLiveFor: aView [
 ]
 
 { #category : #accessing }
+GtInterval >> hash [
+	^ lower hash bitXor: upper hash
+]
+
+{ #category : #accessing }
 GtInterval >> intervalString [
 	^ '[', lower asString, ', ', upper asString, ']'
 ]
